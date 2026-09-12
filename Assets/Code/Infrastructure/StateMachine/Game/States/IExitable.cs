@@ -1,0 +1,9 @@
+﻿using Cysharp.Threading.Tasks;
+
+namespace Code.Infrastructure.StateMachine.Game.States
+{
+    public interface IExitable
+    {
+        UniTaskVoid Exit();
+    }
+}

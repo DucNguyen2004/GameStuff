@@ -1,0 +1,87 @@
+using System.Collections;
+using Code.Infrastructure.Installers;
+using Code.Infrastructure.StateMachine;
+using Code.Infrastructure.StateMachine.Game.States;
+using Code.Services.Providers.Widgets;
+using Code.UI;
+using Cysharp.Threading.Tasks;
+using NUnit.Framework;
+using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.TestTools;
+using VContainer;
+using VContainer.Unity;
+
+namespace Tests.PlayMode
+{
+    public class WidgetProviderPlayModeTest
+    {
+        private IWidgetProvider _provider;
+
+        [UnitySetUp]
+        public IEnumerator SetUp()
+        {
+            yield return LoadInitialScene();
+            yield return new WaitForSeconds(1f);
+            
+            IObjectResolver container = LifetimeScope.Find<BootstrapLifetimeScope>().Container;
+            var stateMachine = container.Resolve<IStateMachine<IGameState>>();
+            yield return stateMachine.Enter<LoadLevelState, string>("Game");
+            
+            _provider = container.Resolve<IWidgetProvider>();
+            Assert.IsNotNull(_provider, "WidgetProvider should not be null");
+            yield return null;
+        }
+        
+        [UnityTearDown]
+        public IEnumerator TearDown()
+        {
+            foreach (var obj in Object.FindObjectsByType<GameObject>(FindObjectsInactive.Exclude))
+            {
+                if (obj.scene.name == null)
+                {
+                    Object.Destroy(obj);
+                }
+            }
+
+            yield return null;
+        }
+        
+        [UnityTest]
+        public IEnumerator Should_Reuse_Play_Animation_Widget()
+        {
+            yield return new WaitForSeconds(5f);
+
+            var firstTask = _provider.GetWidget(Vector3.zero, Quaternion.identity).AsTask();
+            yield return new WaitUntil(() => firstTask.IsCompleted);
+            Widget first = firstTask.Result;
+            first.SetText("Test");
+            first.SetColor(Color.red);
+            first.PlayAnimation();
+            _provider.ReturnWidget(first);
+
+            yield return new WaitForSeconds(1f);
+
+            var reusedTask = _provider.GetWidget(Vector3.right, Quaternion.identity).AsTask();
+            yield return new WaitUntil(() => reusedTask.IsCompleted);
+            Widget reused = reusedTask.Result;
+            reused.SetText("Test_1");
+            reused.SetColor(Color.gray);
+            reused.PlayAnimation();
+
+            yield return new WaitForSeconds(1f);
+
+            Assert.IsNotNull(first, "First widget is null. Possibly CreateWidget returned null.");
+            Assert.IsNotNull(reused, "Reused widget is null. It might have been destroyed or not created properly.");
+            Assert.AreSame(first, reused, "Expected the widget to be reused, but a different instance was returned.");
+            yield return null;
+        }
+        
+        private IEnumerator LoadInitialScene()
+        {
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync("Initial");
+            yield return new WaitUntil(() => asyncLoad.isDone);
+            yield return null;
+        }
+    }
+}
