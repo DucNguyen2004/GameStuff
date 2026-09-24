@@ -1,0 +1,15 @@
+﻿<Solution>
+  <Project Path="Game.csproj" />
+  <Project Path="GameEditor.csproj" />
+  <Project Path="Tests.EditMode.csproj" />
+  <Project Path="MoreMountains.NiceVibrations.Demos.csproj" />
+  <Project Path="MoreMountains.NiceVibrations.Haptics.csproj" />
+  <Project Path="MoreMountains.NiceVibrations.Editor.csproj" />
+  <Project Path="Assembly-CSharp-Editor-firstpass.csproj" />
+  <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="MoreMountains.NiceVibrations.Rumble.csproj" />
+  <Project Path="MoreMountains.NiceVibrations.csproj" />
+  <Project Path="Assembly-CSharp-firstpass.csproj" />
+  <Project Path="MoreMountains.NiceVibrations.Rumble.Editor.csproj" />
+  <Project Path="Tests.PlayMode.csproj" />
+</Solution>
